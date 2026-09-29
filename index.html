@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Zikri Fikri 21 — Creative Developer</title>
+<meta name="description" content="Zikri Fikri 21 — creative developer building interactive digital experiences, mobile apps and experimental products. Explore a hand-drawn paper world." />
+
+<!-- Fonts: one expressive display face, one clean sans, one handwritten accent -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Space+Grotesk:wght@400;500;600&family=Caveat:wght@500;600;700&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="./style.css" />
+
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+  }
+}
+</script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+</head>
+<body>
+
+<!-- ===================== LOADER ===================== -->
+<div id="loader" role="status" aria-live="polite">
+  <div class="loader-inner">
+    <svg class="loader-scribble" viewBox="0 0 220 60" aria-hidden="true">
+      <path d="M6 40 Q 40 6, 70 34 T 140 30 T 214 20" />
+    </svg>
+    <p class="loader-title">BUILDING MY LITTLE WORLD&hellip;</p>
+    <div class="loader-bar">
+      <div class="loader-bar-fill" id="loaderFill"></div>
+    </div>
+    <p class="loader-percent" id="loaderPercent">0%</p>
+    <button id="enterBtn" class="btn-enter" disabled>ENTER WORLD</button>
+  </div>
+</div>
+
+<!-- ===================== WEBGL FALLBACK NOTICE ===================== -->
+<div id="fallbackNotice" hidden>
+  This browser can't run the 3D world, so here's the flat paper version instead — same
+  story, minus the corridor.
+</div>
+
+<canvas id="webgl" aria-hidden="true"></canvas>
+
+<!-- ===================== CONTENT / UI LAYER ===================== -->
+<main id="main">
+
+  <section id="home" class="scene-section" aria-label="Home">
+    <button class="section-close-btn" aria-label="Close">&times;</button>
+
+    <div class="ui-block home-title paper-tag">
+      <h1>ZIKRI FIKRI 21</h1>
+    </div>
+
+    <div class="ui-block home-character-wrapper">
+      <div class="character-arrow-label handwritten">
+        <span>that's me!</span>
+        <svg class="handwritten-arrow" viewBox="0 0 70 45" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <path d="M 8 8 C 30 2, 55 12, 58 35" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"/>
+          <path d="M 44 24 L 59 36 L 63 20" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <div class="home-character-card paper-tag" id="homeCharCard" role="button" tabindex="0" aria-label="View about me details">
+        <img src="./assets/images/me.webp" alt="Zikri Fikri 21 Character" class="home-char-img" />
+      </div>
+    </div>
+
+    <div class="ui-block home-role paper-tag paper-tag--small">
+      <p>CREATIVE DEVELOPER</p>
+      <p class="muted">Designer &times; Developer</p>
+    </div>
+    <div class="scroll-cue">
+      <span class="handwritten">scroll to explore</span>
+      <span class="scroll-cue-arrow">&darr;</span>
+    </div>
+  </section>
+
+  <section id="about" class="scene-section" aria-label="About">
+    <div class="ui-block about-card paper-tag" id="aboutCard" role="button" tabindex="0">
+      <h2>ABOUT ME</h2>
+      <p>
+        I'm a creative developer who enjoys building interactive digital
+        experiences, mobile applications and experimental digital products.
+        I like when a website feels a little bit like a place — somewhere
+        you can wander around, not just scroll past.
+      </p>
+      <button class="btn-open-modal" data-modal="about" aria-label="Open about me popup">LOOK CLOSER &rarr;</button>
+    </div>
+  </section>
+
+  <section id="works" class="scene-section" aria-label="Works">
+    <div class="ui-block works-heading paper-tag paper-tag--small">
+      <h2>WORKS</h2>
+      <p class="muted handwritten">click a poster to look closer</p>
+    </div>
+    <!-- Individual project titles are also rendered here for SEO / accessibility;
+         visually they live on the 3D poster boards. -->
+    <ul id="worksList" class="sr-only-list"></ul>
+  </section>
+
+  <section id="skills" class="scene-section" aria-label="Skills">
+    <div class="ui-block skills-heading paper-tag paper-tag--small">
+      <h2>SKILLS</h2>
+      <p class="muted handwritten">the workshop &bull; click items to inspect</p>
+    </div>
+    <div id="skillsList" class="sr-only-list"></div>
+  </section>
+
+  <section id="contact" class="scene-section" aria-label="Contact">
+    <div class="ui-block contact-card paper-tag">
+      <h2>SEND A MESSAGE IN A BOTTLE</h2>
+      <form id="contactForm" novalidate>
+        <label for="cName">Name</label>
+        <input id="cName" name="name" type="text" required autocomplete="name" />
+
+        <label for="cEmail">Email</label>
+        <input id="cEmail" name="email" type="email" required autocomplete="email" />
+
+        <label for="cMessage">Message</label>
+        <textarea id="cMessage" name="message" rows="3" required></textarea>
+
+        <button type="submit" class="btn-send">SEND MESSAGE</button>
+        <p id="contactStatus" role="status" aria-live="polite" class="handwritten"></p>
+      </form>
+    </div>
+  </section>
+
+</main>
+
+<!-- ===================== POPUP MODAL ===================== -->
+<div id="modalBackdrop" class="modal-backdrop" aria-hidden="true">
+  <div class="modal-paper paper-tag" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <button id="modalClose" class="modal-close-btn" aria-label="Close modal">&times;</button>
+    <div id="modalContent" class="modal-body">
+      <!-- Dynamic content injected here -->
+    </div>
+  </div>
+</div>
+
+<!-- ===================== NAVIGATION ===================== -->
+<button id="menuToggle" aria-label="Menu" aria-expanded="false" aria-controls="navigation"><img src="./assets/images/menu.png" alt="" /></button>
+<nav id="navigation" aria-label="Sections">
+  <div class="map-card">
+    <header><h2>MAP</h2><button class="map-close" aria-label="Close map">&times;</button></header>
+    <div class="map-art">
+      <img src="./assets/images/map/map.webp" alt="" />
+      <img class="hl hl-about" src="./assets/images/map/map_about.webp" alt="" />
+      <img class="hl hl-skills" src="./assets/images/map/map_skill.webp" alt="" />
+      <img class="hl hl-works" src="./assets/images/map/map_project.webp" alt="" />
+      <img class="map-pin" src="./assets/images/map/pin.webp" alt="" />
+      <button class="map-item" data-target="about"><span>ABOUT</span></button>
+      <button class="map-item" data-target="skills"><span>SKILL</span></button>
+      <button class="map-item" data-target="works"><span>PROJECT</span></button>
+    </div>
+    <button data-target="contact" hidden aria-hidden="true"></button><!-- not on the map; the About popup's contact button clicks it -->
+  </div>
+</nav>
+
+<!-- ===================== SKY ROOM (languages & frameworks) HUD ===================== -->
+<button id="skyBack" aria-label="Back to the corridor">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 12H4M10 6l-6 6 6 6"/></svg>
+</button>
+<p id="skyHint" class="handwritten">scroll to keep flying &darr;</p>
+<div id="skyFade" aria-hidden="true"></div>
+
+<!-- ===================== CUSTOM CURSOR ===================== -->
+<div id="cursor" aria-hidden="true">
+  <div class="cursor-dot"></div>
+  <div class="cursor-ring"></div>
+  <span class="cursor-label"></span>
+</div>
+
+<script type="module" src="./script.js"></script>
+</body>
+</html>
