@@ -11,11 +11,13 @@ import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
    --------------------------------------------------------- */
 const profile = {
   name: "ZIKRI FIKRI 21",
-  role: "CREATIVE DEVELOPER",
-  tagline: "Designer × Developer",
+  role: "Full Stack Developer",
+  tagline: "Designer & Developer",
   about:
-    "I'm a creative developer who enjoys building interactive digital experiences, mobile applications and experimental digital products.",
+    "I'm a full stack developer who enjoys building interactive digital experiences, mobile applications and experimental digital products.",
 };
+
+const INSTAGRAM_URL = "https://instagram.com/zikrifikri.21";
 
 const projects = [
   {
@@ -207,15 +209,15 @@ function openModal(type, data) {
         </div>
 
         <div class="modal-home-role paper-tag paper-tag--small">
-          <p>CREATIVE DEVELOPER</p>
-          <p class="muted">Designer &times; Developer</p>
+          <p>Full Stack Developer</p>
+          <p class="muted">Designer &amp; Developer</p>
         </div>
 
         <div class="modal-divider"></div>
 
         <div class="modal-text">
           <p>
-            I'm a creative developer who enjoys building interactive digital experiences,
+            I'm a full stack developer who enjoys building interactive digital experiences,
             mobile applications, and experimental digital products.
           </p>
           <p>
@@ -271,6 +273,17 @@ function openModal(type, data) {
         <button class="btn-modal-secondary modal-close-action">CLOSE</button>
       </div>
     `;
+  } else if (type === "instagram") {
+    html = `
+      <div class="modal-badge handwritten">LET'S CONNECT</div>
+      <h2 id="modalTitle" class="modal-title">VISIT MY INSTAGRAM</h2>
+      <div class="modal-divider"></div>
+      <p class="modal-description">Come say hi, I would love to hear from you.</p>
+      <div class="modal-actions">
+        <a href="${INSTAGRAM_URL}" target="_blank" rel="noopener" class="btn-modal-action">INSTAGRAM &rarr; @zikrifikri.21</a>
+        <button class="btn-modal-secondary modal-close-action">CLOSE</button>
+      </div>
+    `;
   } else if (type === "social") {
     html = `
       <div class="modal-badge handwritten">LET'S CONNECT</div>
@@ -278,7 +291,7 @@ function openModal(type, data) {
       <div class="modal-divider"></div>
       <p class="modal-description">Find me around the internet:</p>
       <div class="modal-actions">
-        <a href="https://instagram.com/zikrifikri.21" target="_blank" rel="noopener" class="btn-modal-action">INSTAGRAM &rarr; @zikrifikri.21</a>
+        <a href="${INSTAGRAM_URL}" target="_blank" rel="noopener" class="btn-modal-action">INSTAGRAM &rarr; @zikrifikri.21</a>
         <a href="https://github.com/zikrifikri21" target="_blank" rel="noopener" class="btn-modal-action">GITHUB &rarr; zikrifikri21</a>
         <button class="btn-modal-secondary modal-close-action">CLOSE</button>
       </div>
@@ -520,16 +533,19 @@ function initExperience() {
   const FLOOR_Y = -2.05, CEIL_Y = 3.25;
   ribbon((z, k) => [bendX(z) + (k ? HW : -HW), FLOOR_Y, z], undefined, undefined, floorMat);
   ribbon((z, k) => [bendX(z) + (k ? HW : -HW), CEIL_Y, z], undefined, undefined, ceilingMat); // Plafon dengan tekstur baru
-  ribbon((z, k) => [bendX(z) - HW, k ? CEIL_Y : FLOOR_Y, z]);
-  const DOOR_Z = -45, SKILL_DOOR_Z = -65, GAP = 1.7, DOOR_H = 3.6, DOOR_TOP = FLOOR_Y + DOOR_H;
-  const rightWall = (z, k) => [bendX(z) + HW, k ? CEIL_Y : FLOOR_Y, z];
-  let wallZ = CORRIDOR_START; // right wall with a narrow gap + lintel for each real door (listed nearest first)
-  [DOOR_Z, SKILL_DOOR_Z].forEach((dz) => {
-    ribbon(rightWall, wallZ, dz + GAP / 2);
-    ribbon((z, k) => [bendX(z) + HW, k ? CEIL_Y : DOOR_TOP, z], dz + GAP / 2, dz - GAP / 2); // lintel
-    wallZ = dz - GAP / 2;
-  });
-  ribbon(rightWall, wallZ, CORRIDOR_END);
+  const DOOR_Z = -45, SKILL_DOOR_Z = -65, CONTACT_DOOR_Z = -75, GAP = 1.7, DOOR_H = 3.6, DOOR_TOP = FLOOR_Y + DOOR_H;
+  function wallWithDoors(s, doorZs) { // side wall (s = 1 right, -1 left) with a narrow gap + lintel for each real door (listed nearest first)
+    const edge = (low) => (z, k) => [bendX(z) + s * HW, k ? CEIL_Y : low, z];
+    let wallZ = CORRIDOR_START;
+    doorZs.forEach((dz) => {
+      ribbon(edge(FLOOR_Y), wallZ, dz + GAP / 2);
+      ribbon(edge(DOOR_TOP), dz + GAP / 2, dz - GAP / 2); // lintel
+      wallZ = dz - GAP / 2;
+    });
+    ribbon(edge(FLOOR_Y), wallZ, CORRIDOR_END);
+  }
+  wallWithDoors(1, [DOOR_Z, SKILL_DOOR_Z]); // PROJECT, SKILL
+  wallWithDoors(-1, [CONTACT_DOOR_Z]); // CONTACT
 
   /* ---------- CEILING FANS (fan_grille.glb, placed once the loop stage exists) ---------- */
   const textureLoader = new THREE.TextureLoader();
@@ -766,10 +782,10 @@ function initExperience() {
   function createProjectBoard(project, place) {
     const tex = paperCanvas(512, 640, (ctx, w, h) => {
       ctx.textAlign = "center";
-      ctx.font = "bold 46px 'Archivo Black', sans-serif";
+      ctx.font = "900 46px 'Coustard', serif";
       ctx.fillStyle = "#111";
       wrapText(ctx, project.title.toUpperCase(), w / 2, h / 2 - 40, w - 80, 50);
-      ctx.font = "26px 'Space Grotesk', sans-serif";
+      ctx.font = "26px 'Coustard', serif";
       ctx.fillStyle = "#77736a";
       ctx.fillText(project.category.toUpperCase(), w / 2, h / 2 + 60);
       ctx.font = "32px 'Caveat', cursive";
@@ -810,69 +826,126 @@ function initExperience() {
     return board;
   }
 
-  /* Before/after case-study board: two stacked planes (sketch + final), crossfaded on hover/click. */
-  function createShowcaseBoard(project, place) {
-    const boardH = 1.7, boardW = boardH * project.aspect;
+  /* Project card for the room behind the PROJECT door: hand-drawn paper card (ink border, Coustard Black title, Caveat
+     scribbles) with the before/after image on top and a paper "Project N" plate below. Hover or click crossfades
+     the "before" sketch into the "after" result. Hung on the room's side walls, local +z = into the room. */
+  const RW = 12, RL = 14.4, FW = 2.2, FH = 2.6, CARD_Y = 0.2; // room width / length (model x1.2), card size, card centre height
+  const CPX = 300; // canvas pixels per world unit
+  const basic = (o) => new THREE.MeshBasicMaterial(o);
+  /* Window light. The room is baked and the cards are unlit, so nothing lights them: paint what the window would do.
+     The window is in the far wall and its sun lands on the floor, so the light travels along the side walls from the far
+     end and down: each card is brightest on the edge that faces the window and toward its bottom (where the floor patch
+     bounces back up), fades to nothing at the top and the door-side edge, and is stronger the closer it hangs to the
+     window. No panes drawn on the cards: the window itself is in the far wall. Additive, so it only ever adds light. */
+  const lightTex = (w, h, draw) => {
+    const c = document.createElement("canvas");
+    c.width = w;
+    c.height = h;
+    draw(c.getContext("2d"), w, h);
+    const t = new THREE.CanvasTexture(c);
+    t.colorSpace = THREE.SRGBColorSpace;
+    return t;
+  };
+  const rakeMat = basic({
+    transparent: true, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide,
+    map: lightTex(128, 128, (g, w, h) => {
+      const x = g.createLinearGradient(0, 0, w, 0); // brightest at the right edge (u = 1), which is turned toward the window
+      x.addColorStop(0, "rgba(255,150,100,0)");
+      x.addColorStop(0.5, "rgba(255,155,105,.12)");
+      x.addColorStop(1, "rgba(255,175,115,.6)");
+      g.fillStyle = x;
+      g.fillRect(0, 0, w, h);
+      const y = g.createLinearGradient(0, 0, 0, h); // light heads down to the floor: nothing at the top, full at the bottom
+      y.addColorStop(0, "rgba(0,0,0,0)");
+      y.addColorStop(1, "rgba(0,0,0,1)");
+      g.globalCompositeOperation = "destination-in";
+      g.fillStyle = y;
+      g.fillRect(0, 0, w, h);
+    }),
+  });
+  const WARM = 0xf5e2dd; // multiplies the card art a touch rosier and dimmer, like the dusk room
+  function createGalleryFrame(project, i, room) {
+    const s = i % 2 ? 1 : -1; // even -> left wall, odd -> right wall
+    const g = new THREE.Group();
+    g.position.set(s * (RW / 2 - HANG - 0.05), CARD_Y, -3.3 - (i >> 1) * 3.1);
+    g.rotation.set(0, -s * (Math.PI / 2), (Math.random() - 0.5) * 0.05); // hung by hand: never quite level
 
-    const beforeTex = textureLoader.load(`./assets/images/projects/${project.before}`);
-    beforeTex.colorSpace = THREE.SRGBColorSpace;
-    const beforeMesh = new THREE.Mesh(
-      new THREE.PlaneGeometry(boardW, boardH),
-      new THREE.MeshBasicMaterial({ map: beforeTex })
+    const SLOT_W = FW - 0.3, SLOT_H = 1.2, SLOT_TOP = 0.25; // image slot, measured from the card's top edge
+    const face = new THREE.Mesh(
+      new THREE.PlaneGeometry(FW, FH),
+      basic({
+        color: WARM,
+        map: paperCanvas(FW * CPX, FH * CPX, (c, w) => {
+          const x0 = (w - SLOT_W * CPX) / 2;
+          c.fillStyle = "#f0e9d6";
+          c.fillRect(x0, SLOT_TOP * CPX, SLOT_W * CPX, SLOT_H * CPX); // paper behind the image, so a wide image leaves no hole
+          c.strokeStyle = "#111";
+          c.lineWidth = 4;
+          c.strokeRect(x0, SLOT_TOP * CPX, SLOT_W * CPX, SLOT_H * CPX);
+          c.fillStyle = "#111";
+          c.textBaseline = "alphabetic";
+          c.font = "900 44px 'Coustard', serif";
+          const lines = [""]; // wrap the title onto as many lines as it needs
+          project.title.toUpperCase().split(" ").forEach((word) => {
+            const t = `${lines.at(-1)} ${word}`.trim();
+            if (c.measureText(t).width > w - 80 && lines.at(-1)) lines.push(word);
+            else lines[lines.length - 1] = t;
+          });
+          lines.forEach((l, k) => c.fillText(l, 40, (SLOT_TOP + SLOT_H) * CPX + 70 + k * 50));
+          const y = (SLOT_TOP + SLOT_H) * CPX + 70 + lines.length * 50;
+          c.fillStyle = "#77736a";
+          c.font = "22px 'Coustard', serif";
+          c.fillText(project.category.toUpperCase(), 40, y - 8);
+          c.fillStyle = "#111";
+          c.font = "32px 'Caveat', cursive";
+          c.fillText("hover / tap: before → after", 40, FH * CPX - 34);
+        }),
+      })
     );
+    face.position.z = 0.02;
 
-    const afterTex = textureLoader.load(`./assets/images/projects/${project.after}`);
-    afterTex.colorSpace = THREE.SRGBColorSpace;
-    const afterMat = new THREE.MeshBasicMaterial({ map: afterTex, transparent: true, opacity: 0, depthWrite: false });
-    const afterMesh = new THREE.Mesh(new THREE.PlaneGeometry(boardW, boardH), afterMat);
-    afterMesh.position.z = 0.003; // just in front of "before", so the crossfade has no z-fighting
+    const tex = (f) => {
+      const t = textureLoader.load(`./assets/images/projects/${f}`);
+      t.colorSpace = THREE.SRGBColorSpace;
+      return t;
+    };
+    const bw = Math.min(SLOT_W - 0.06, (SLOT_H - 0.06) * project.aspect), bh = bw / project.aspect; // fit inside the slot
+    const slotY = FH / 2 - SLOT_TOP - SLOT_H / 2;
+    const beforeMesh = new THREE.Mesh(new THREE.PlaneGeometry(bw, bh), basic({ color: WARM, map: tex(project.before) }));
+    beforeMesh.position.set(0, slotY, 0.025);
+    const afterMat = basic({ color: WARM, map: tex(project.after), transparent: true, opacity: 0, depthWrite: false });
+    const afterMesh = new THREE.Mesh(new THREE.PlaneGeometry(bw, bh), afterMat);
+    afterMesh.position.set(0, slotY, 0.028); // just in front of "before": no z-fighting during the crossfade
     afterMesh.renderOrder = 1;
 
-    const labelTex = paperCanvas(700, 170, (ctx, w, h) => {
-      ctx.font = "bold 42px 'Archivo Black', sans-serif";
-      ctx.fillStyle = "#111";
-      ctx.textAlign = "center";
-      ctx.fillText(project.title.toUpperCase(), w / 2, h / 2 - 6);
-      ctx.font = "24px 'Space Grotesk', sans-serif";
-      ctx.fillStyle = "#77736a";
-      ctx.fillText(project.category.toUpperCase(), w / 2, h / 2 + 40);
-    });
-    const label = new THREE.Mesh(
-      new THREE.PlaneGeometry(Math.min(boardW * 0.95, 2.6), Math.min(boardW * 0.95, 2.6) * (170 / 700)),
-      paperMaterial(labelTex)
+    const plate = new THREE.Mesh(
+      new THREE.PlaneGeometry(1.2, 0.36),
+      basic({
+        map: paperCanvas(400, 120, (c, w, h) => {
+          c.fillStyle = "#111";
+          c.font = "700 66px 'Caveat', cursive";
+          c.textAlign = "center";
+          c.textBaseline = "middle";
+          c.fillText(`Project ${i + 1}`, w / 2, h / 2 + 4);
+        }),
+      })
     );
-    label.position.set(0, boardH / 2 + 0.34, 0.002);
+    plate.position.set(0, -FH / 2 - 0.32, 0.02);
+    plate.rotation.z = -0.02;
 
-    const hint = new THREE.Mesh(
-      new THREE.PlaneGeometry(1.3, 0.32),
-      paperMaterial(
-        paperCanvas(360, 90, (ctx, w, h) => {
-          ctx.font = "34px 'Caveat', cursive";
-          ctx.fillStyle = "#111";
-          ctx.textAlign = "center";
-          ctx.fillText("hover / tap: before → after", w / 2, h / 2 + 12);
-        })
-      )
-    );
-    hint.position.set(0, -boardH / 2 - 0.26, 0.002);
-    hint.rotation.z = -0.02;
+    const towardWindow = -s; // local x that points to the far wall: +x on the left wall, -x on the right one
+    const near = THREE.MathUtils.clamp(-g.position.z / RL, 0, 1); // 0 at the door, 1 at the window wall
+    const k = 0.35 + 0.65 * near; // closer to the window = more light
+    const rake = new THREE.Mesh(new THREE.PlaneGeometry(FW, FH), rakeMat.clone());
+    rake.material.opacity = k;
+    rake.scale.x = towardWindow; // flips the gradient for the right wall
+    rake.position.z = 0.032; // over the images (0.025 / 0.028); not in interactiveMeshes, so it never eats a hover
+    rake.renderOrder = 3;
+    g.add(face, beforeMesh, afterMesh, rake, plate);
+    room.add(g);
 
-    const group = new THREE.Group();
-    group.add(beforeMesh, afterMesh, label, hint);
-    place(group);
-
-    beforeMesh.userData = {
-      type: "showcase",
-      data: project,
-      afterMat,
-      revealed: false,
-      baseRotY: 0,
-      baseRotZ: 0,
-      baseScale: 1,
-    };
+    beforeMesh.userData = { type: "showcase", data: project, afterMat, revealed: false, baseRotY: 0, baseRotZ: 0, baseScale: 1 };
     interactiveMeshes.push(beforeMesh);
-    addFloat(group, { speed: 0.35, amp: 0.006, axis: "z", offset: Math.random() * 5 });
-    return group;
   }
 
   const worksSpan = 20; // spread boards across this many world units
@@ -891,7 +964,7 @@ function initExperience() {
       220,
       160,
       (ctx, w, h) => {
-        ctx.font = "bold 30px 'Space Grotesk', sans-serif";
+        ctx.font = "900 30px 'Coustard', serif";
         ctx.fillStyle = "#111";
         ctx.textAlign = "center";
         ctx.fillText(name, w / 2, h / 2 + 10);
@@ -985,7 +1058,7 @@ function initExperience() {
   scene.add(messagePaper);
 
   const contactSignTex = paperCanvas(512, 220, (ctx, w, h) => {
-    ctx.font = "bold 30px 'Archivo Black', sans-serif";
+    ctx.font = "900 30px 'Coustard', serif";
     ctx.fillStyle = "#111";
     ctx.textAlign = "center";
     ctx.fillText("CLICK HERE", w / 2, h / 2 - 8);
@@ -1014,18 +1087,37 @@ function initExperience() {
   });
 
   /* ---------- DOOR + PROJECT ROOM (right wall, beside the Fieldnote poster) ---------- */
-  const ROOM_S = 1.2, ROOM_W = 10 * ROOM_S, FRAME_W = 2.04, LEAF_W = FRAME_W * 0.82, LEAF_H = DOOR_H - 0.05; // frame > 2-unit wall gap, leaf hides under the trim
+  const FRAME_W = 2.04, LEAF_W = FRAME_W * 0.82, LEAF_H = DOOR_H - 0.05; // frame > 2-unit wall gap, leaf hides under the trim
   const doorMat = (f) => {
     const t = textureLoader.load(`./assets/images/${f}.webp`);
     t.colorSpace = THREE.SRGBColorSpace;
     return new THREE.MeshStandardMaterial({ map: t, transparent: true, alphaTest: 0.05, roughness: 0.9, side: THREE.DoubleSide });
   };
   const frameMat = doorMat("door-frame"), leafMat = doorMat("door-leaf");
-  /* Door on the right wall at z. depth = how far the camera may walk in; enter = walk-in fraction right after the
+  /* Paper name plate above a door (on the lintel). Low and small on purpose: at the door stop the view ends at y ~ 1.94. */
+  function doorSign(text) {
+    const mk = () =>
+      paperCanvas(700, 190, (c, w, h) => {
+        c.font = "900 96px 'Coustard', serif";
+        c.fillStyle = "#111";
+        c.textAlign = "center";
+        c.textBaseline = "middle";
+        c.fillText(text, w / 2, h / 2 + 4);
+      });
+    const m = new THREE.Mesh(new THREE.PlaneGeometry(1.7, 1.7 * (190 / 700)), paperMaterial(mk()));
+    m.position.set(0, DOOR_TOP + 0.26, 0.05);
+    document.fonts.load("900 96px 'Coustard'").then(() => { // first draw may use the fallback font
+      m.material.map.dispose();
+      m.material.map = mk();
+      m.material.needsUpdate = true;
+    });
+    return m;
+  }
+  /* Door on a side wall at z. depth = how far the camera may walk in; enter = walk-in fraction right after the
      door opens (1 for a small room, so the view is inside without scrolling). annex: local +z = corridor side, -z = into the room. */
-  function createDoor(z, { depth, enter = 0, sky = false }) {
+  function createDoor(z, { depth, enter = 0, side = "right", go = null, target, label = "" }) {
     const annex = new THREE.Group();
-    hangOnWall(annex, "right", z, 0, 0);
+    hangOnWall(annex, side, z, 0, 0);
     scene.add(annex);
     const frame = new THREE.Mesh(new THREE.PlaneGeometry(FRAME_W, DOOR_H), frameMat);
     frame.position.set(0, FLOOR_Y + DOOR_H / 2, 0.03);
@@ -1033,17 +1125,18 @@ function initExperience() {
     pivot.position.set(-LEAF_W / 2, FLOOR_Y + LEAF_H / 2, -0.02);
     const leaf = new THREE.Mesh(new THREE.PlaneGeometry(LEAF_W, LEAF_H), leafMat);
     leaf.position.x = LEAF_W / 2;
-    const door = { annex, pivot, depth, enter, sky };
+    const door = { annex, pivot, depth, enter, go, target, z }; // go = runs once the door is open (a full-screen room), target = its menu item
     leaf.userData = { type: "door", door, baseRotY: 0, baseRotZ: 0, baseScale: 1 };
     pivot.add(leaf);
     const frameIn = frame.clone(); // same frame again on the room side, facing inward
     frameIn.rotation.y = Math.PI;
     frameIn.position.z = -0.03;
     annex.add(frame, frameIn, pivot);
+    if (label) annex.add(doorSign(label));
     interactiveMeshes.push(leaf);
     return door;
   }
-  const door1 = createDoor(DOOR_Z, { depth: 10 });
+  const door1 = createDoor(DOOR_Z, { depth: 11, target: "works", label: "PROJECT" });
   const annex = door1.annex;
   /* baked room model: its +z wall sits on the doorway plane, faces point inward so it's invisible from the corridor */
   new GLTFLoader().load("./assets/models/vr_liminal_room_baked.glb", (gltf) => {
@@ -1058,25 +1151,29 @@ function initExperience() {
       if (m.isMesh)
         m.material = new THREE.MeshBasicMaterial({ map: m.material.map, clippingPlanes: hole, clipIntersection: true });
     });
-    model.scale.setScalar(ROOM_S);
-    model.position.set(0, FLOOR_Y - 0.02, -6 * ROOM_S); // 0.02 under the corridor floor: no coplanar flicker
+    model.scale.setScalar(RW / 10); // model is 10 wide, 12 long, 4 high
+    model.position.set(0, FLOOR_Y - 0.02, -RL / 2); // 0.02 under the corridor floor: no coplanar flicker
     annex.add(model);
   });
+  /* The window panes are holes in the baked model, so they showed the paper background. Hang a hand-drawn dusk sky
+     behind the far wall (y: horizon lands low in the window at eye height, sun above it). */
+  const duskTex = textureLoader.load("./assets/textures/dusk-sky.webp");
+  duskTex.colorSpace = THREE.SRGBColorSpace;
+  const duskSky = new THREE.Mesh(new THREE.PlaneGeometry(16, 9.6), new THREE.MeshBasicMaterial({ map: duskTex, fog: false }));
+  duskSky.position.set(0, 1.3, -RL - 6);
+  annex.add(duskSky);
 
-  roomShowcase.forEach((p, i) => {
-    createShowcaseBoard(p, (b) => {
-      b.position.set(i % 2 ? ROOM_W / 2 - HANG - 0.3 : HANG - ROOM_W / 2 + 0.3, 0.9, -3.2 - Math.floor(i / 2) * 3.4);
-      b.rotation.y = i % 2 ? -Math.PI / 2 : Math.PI / 2;
-      annex.add(b);
-    });
-  });
+  /* cards wait for the web fonts, so the titles are drawn in Coustard / Caveat from the first frame */
+  Promise.all(["900 44px 'Coustard'", "32px 'Caveat'", "22px 'Coustard'"].map((f) => document.fonts.load(f))).then(() =>
+    roomShowcase.forEach((p, i) => createGalleryFrame(p, i, annex))
+  );
 
   /* ---------- SKY ROOM (right wall, z = -65): languages & frameworks ----------
      Opening the door walks the camera into a white glow, then a white fade swaps the view to skyScene: a paper-airplane
      guide flying through an endless cloud stream (one labelled cloud per language/framework, plus the reclining character).
      Scroll / drag / arrow keys speed the flight up or reverse it; clouds wrap modulo SKY_LEN, so it never ends.
      The top-left back button (#skyBack) is the way out: fade back, door closes, corridor again. */
-  const door2 = createDoor(SKILL_DOOR_Z, { depth: 3.4, enter: 1, sky: true });
+  const door2 = createDoor(SKILL_DOOR_Z, { depth: 3.4, enter: 1, go: () => enterRoom("sky"), target: "skills", label: "SKILL" });
   const glow = new THREE.Mesh(new THREE.PlaneGeometry(12, 8), new THREE.MeshBasicMaterial({ color: 0xfafafa, fog: false }));
   glow.position.set(0, 0.5, -4); // behind the walk-in stop, so the doorway shows white instead of the void
   door2.annex.add(glow);
@@ -1092,7 +1189,7 @@ function initExperience() {
   skyCam.position.set(0, 5, 8);
   skyCam.lookAt(0, 0.6, -1);
   const sky = { pos: 0, vel: 0, items: [], plane: null };
-  let skyMode = false;
+  let skyMode = false, contactMode = false; // which full-screen room is showing, if any
   const skyGo = (dy) => (sky.vel = THREE.MathUtils.clamp(sky.vel + dy * 0.12, -40, 40));
 
   const fitFont = (ctx, text, maxW, px, font) => {
@@ -1121,7 +1218,7 @@ function initExperience() {
   /* canvas text needs the web fonts first (or their fallbacks, if loading fails) */
   Promise.allSettled([
     loadImg("./assets/images/cloud.webp"), loadImg("./assets/images/clouds.webp"), loadImg("./assets/images/me-cloud.webp"),
-    document.fonts?.load("bold 30px 'Space Grotesk'"), document.fonts?.load("60px 'Fredericka the Great'"),
+    document.fonts?.load("900 30px 'Coustard'"), document.fonts?.load("60px 'Fredericka the Great'"),
     ...ropeSkills.map(([, f]) => loadImg(`./assets/images/skills/${f}.webp`)),
   ]).then((r) => {
     const [c1, c2, me] = r.slice(0, 3).map((x) => x.value);
@@ -1181,7 +1278,7 @@ function initExperience() {
         canvasTex(512, 96, (ctx) => {
           ctx.fillStyle = "#111";
           ctx.textAlign = align;
-          ctx.font = "600 44px 'Space Grotesk', sans-serif";
+          ctx.font = "900 44px 'Coustard', serif";
           ctx.fillText(text, align === "right" ? 500 : 12, 64);
         }),
         2.9, 0.54, 10, x, -1.2, 2, [fx, 0]
@@ -1204,37 +1301,107 @@ function initExperience() {
     }
   }
 
-  /* white fade hides the swap between corridor and sky (CSS: body.sky-fade) */
+  /* white fade hides the swap between the corridor and a full-screen room (CSS: body.sky-fade / sky-mode) */
   const bodyCls = document.body.classList;
-  function enterSky() {
+  function enterRoom(kind) {
     if (!st.open) return; // the visitor already walked back out
     bodyCls.add("sky-fade");
     gsap.delayedCall(D(0.45), () => {
       if (!st.open) return bodyCls.remove("sky-fade");
-      sky.pos = sky.vel = 0; // always start at the character
-      skyMode = true;
+      sky.pos = sky.vel = 0; // the sky always starts at the character
+      skyMode = kind === "sky";
+      contactMode = kind === "contact";
+      document.getElementById("skyHint").textContent = skyMode ? "scroll to keep flying \u2193" : "click the kite";
       document.documentElement.style.overflow = "hidden"; // keys / wheel must not move the corridor behind
+      bodyCls.toggle("contact-room", contactMode);
       bodyCls.add("sky-mode");
       bodyCls.remove("sky-fade");
     });
   }
-  function exitSky() {
-    if (!skyMode || bodyCls.contains("sky-fade")) return;
+  function exitRoom() {
+    if (!(skyMode || contactMode) || bodyCls.contains("sky-fade")) return;
     bodyCls.add("sky-fade");
     gsap.delayedCall(D(0.45), () => {
-      skyMode = false;
+      skyMode = contactMode = kiteHover = false;
       document.documentElement.style.overflow = "";
-      bodyCls.remove("sky-mode", "sky-fade");
+      bodyCls.remove("sky-mode", "sky-fade", "contact-room");
       leaveDoor(); // door closes, camera walks back into the corridor
     });
   }
-  document.getElementById("skyBack").addEventListener("click", exitSky);
+  document.getElementById("skyBack").addEventListener("click", exitRoom);
   window.addEventListener("keydown", (e) => {
-    if (!skyMode) return;
-    if (e.key === "Escape") exitSky();
-    else if (/^Arrow(Down|Right)$/.test(e.key)) skyGo(120);
-    else if (/^Arrow(Up|Left)$/.test(e.key)) skyGo(-120);
+    if (!skyMode && !contactMode) return;
+    if (e.key === "Escape") modalBackdrop.classList.contains("is-open") || exitRoom(); // Esc closes the popup first
+    else if (skyMode && /^Arrow(Down|Right)$/.test(e.key)) skyGo(120);
+    else if (skyMode && /^Arrow(Up|Left)$/.test(e.key)) skyGo(-120);
   });
+
+  /* ---------- CONTACT ROOM (left wall, z = -75): a kid flying the Instagram kite ----------
+     assets/images/contact is a stack of 1080x720 layers, so they are stacked as they are in a flat scene (1 unit = 720px:
+     pixel (x, y) -> ((x - 540) / 720, (360 - y) / 720)). The mouse shifts each layer a little (parallax), the clouds drift and
+     the kite sways on its string. Clicking the kite opens the Instagram popup. Entered like the sky room (white fade). */
+  let kiteHover = false;
+  const contactTex = (f) => {
+    const t = textureLoader.load(`./assets/images/contact/${f}.webp`);
+    t.colorSpace = THREE.SRGBColorSpace;
+    return t;
+  };
+  const contactScene = new THREE.Scene();
+  const contactCam = new THREE.OrthographicCamera(-1.5, 1.5, 1, -1, -1, 1); // height 2; left/right follow the aspect (fitContact)
+  const layers = new THREE.Group(); // scaled to cover the screen
+  contactScene.add(layers);
+  const at = (x, y) => new THREE.Vector3((x - 540) / 720, (360 - y) / 720, 0);
+  const layer = (f, order, parent = layers) => {
+    const m = new THREE.Mesh(new THREE.PlaneGeometry(1.5, 1), new THREE.MeshBasicMaterial({ map: contactTex(f), transparent: true, depthWrite: false }));
+    m.renderOrder = order;
+    parent.add(m);
+    return m;
+  };
+  const movers = []; // layers that move with the pointer (depth) and drift on their own (amp)
+  const mover = (obj, depth, amp = 0, speed = 0, phase = 0) => movers.push({ obj, base: obj.position.clone(), depth, amp, speed, phase });
+
+  mover(layer("bg", 0), 0.012);
+  for (let i = 1; i <= 7; i++) mover(layer(`awan${i}`, i), 0.014 + i * 0.002, 0.02 + i * 0.004, 0.15 + i * 0.04, i * 1.7);
+  mover(layer("orang", 8), 0.016);
+  const HAND = at(507, 476), KITE_TOP = at(590, 211); // the string's two ends in the art
+  const stringPivot = new THREE.Group(); // the string swings around the kid's hand...
+  stringPivot.position.copy(HAND);
+  layers.add(stringPivot);
+  layer("tali-layangan", 9, stringPivot).position.copy(HAND).negate();
+  const kitePivot = new THREE.Group(); // ...and the kite around the string's top end
+  kitePivot.position.copy(KITE_TOP).sub(HAND);
+  stringPivot.add(kitePivot);
+  const kite = layer("layangan", 10, kitePivot);
+  kite.position.copy(KITE_TOP).negate();
+  mover(stringPivot, 0.016); // pivots sit at the kid's hand, so they move exactly like the kid
+
+  const cp = { x: 0, y: 0 }; // eased pointer, -1..1
+  function updateContact(t) {
+    const k = reduceMotion ? 0 : 1;
+    cp.x += (mouseX - cp.x) * 0.06;
+    cp.y += (mouseY - cp.y) * 0.06;
+    movers.forEach(({ obj, base, depth, amp, speed, phase }) =>
+      obj.position.set(base.x + k * (Math.sin(t * speed + phase) * amp - cp.x * depth), base.y + k * cp.y * depth, base.z)
+    );
+    stringPivot.rotation.z = k * Math.sin(t * 0.9) * 0.035;
+    kitePivot.rotation.z = k * Math.sin(t * 1.4 + 1) * 0.1;
+    kitePivot.scale.setScalar(THREE.MathUtils.lerp(kitePivot.scale.x, kiteHover ? 1.15 : 1, 0.15));
+  }
+  function fitContact() { // cover the screen like background-size: cover, plus 6% spare for the parallax shift
+    const a = window.innerWidth / window.innerHeight;
+    contactCam.left = -a;
+    contactCam.right = a;
+    contactCam.updateProjectionMatrix();
+    layers.scale.setScalar(Math.max(2, (2 * a) / 1.5) * 1.06);
+  }
+  fitContact();
+
+  /* the doorway shows the same sunset while the camera walks in, before the fade swaps to the room */
+  const door3 = createDoor(CONTACT_DOOR_Z, { depth: 3.4, enter: 1, side: "left", go: () => enterRoom("contact"), target: "contact", label: "CONTACT" });
+  const sunset = new THREE.Mesh(new THREE.PlaneGeometry(12, 8), new THREE.MeshBasicMaterial({ map: contactTex("bg"), fog: false }));
+  sunset.position.set(0, 0.5, -4); // behind the walk-in stop, like the sky room's glow
+  door3.annex.add(sunset);
+  const doors = [door1, door2, door3];
 
   /* bend pass: shift every straight-built prop onto the winding path */
   scene.children.forEach((o) => {
@@ -1322,7 +1489,7 @@ function initExperience() {
     if (st.open || st.focus > 0) return;
     st.door = door;
     gsap.to(look, { yaw: 0, pitch: 0, duration: D(1) }); // face the door
-    gsap.timeline({ onComplete: () => ((st.open = true), (st.roomGoal = door.enter), door.sky && gsap.delayedCall(D(0.9), enterSky)) })
+    gsap.timeline({ onComplete: () => ((st.open = true), (st.roomGoal = door.enter), door.go && gsap.delayedCall(D(0.9), door.go)) })
       .to(st, { focus: 1, duration: D(1.4), ease: "power2.inOut" })
       .to(door.pivot.rotation, { y: 1.75, duration: D(1.1), ease: "power2.out" });
   }
@@ -1351,6 +1518,10 @@ function initExperience() {
       drag = { x: e.clientX, y: e.clientY };
       return;
     }
+    if (contactMode) { // nothing to drag in the kite room; keep counting movement so a drag isn't taken for a click
+      drag = { x: e.clientX, y: e.clientY };
+      return;
+    }
     const yl = st.focus ? Infinity : 1.3, pl = st.focus ? 1.2 : 0.35; // free 360° in the room, limited in the corridor
     look.yaw = Math.max(-yl, Math.min(yl, look.yaw + (e.clientX - drag.x) * 0.005));
     const dy = e.clientY - drag.y;
@@ -1367,6 +1538,7 @@ function initExperience() {
   window.addEventListener("pointercancel", () => (drag = null)); // touch turned into a vertical scroll
   function nudge(dy, e) {
     if (skyMode) return e.preventDefault(), skyGo(dy);
+    if (contactMode) return e.preventDefault(); // wheel must not walk out of the room
     if (!st.open) return;
     e.preventDefault();
     if (dy < 0 && st.roomGoal === 0) return leaveDoor(); // scroll up at the doorstep = step back out
@@ -1407,7 +1579,7 @@ function initExperience() {
   }
   window.addEventListener("scroll", updateTargetFromScroll, { passive: true });
 
-  const sectionEntries = Object.entries(SECTIONS); // [name, z]
+  const sectionEntries = [...Object.entries(SECTIONS), ...doors.map((d) => [d.target, d.z - 3])]; // [name, z]; a door counts for its room's menu item
   function closestSection(z) {
     let best = sectionEntries[0];
     let bestDist = Infinity;
@@ -1428,20 +1600,24 @@ function initExperience() {
       activeSection = name;
     }
   }
+  const navButtons = [...document.querySelectorAll("#navigation [data-target]")];
   function updateActiveNav(z) {
-    const name = closestSection(z);
-    document.querySelectorAll("#navigation [data-target]").forEach((btn) => {
-      btn.classList.toggle("is-active", btn.dataset.target === name);
-    });
+    const name = st.focus ? st.door.target : closestSection(z); // inside a room, that room's item stays lit wherever the camera stands
+    navButtons.forEach((btn) => btn.classList.toggle("is-active", btn.dataset.target === name));
   }
 
   /* ---------------------------------------------------------
      5. NAVIGATION CLICKS
      --------------------------------------------------------- */
-  document.querySelectorAll("#navigation [data-target]").forEach((btn) => {
+  let pendingDoor = null; // menu click on a room: the door opens once the camera has walked up to it (see tick)
+  ["wheel", "pointerdown", "keydown"].forEach((ev) => window.addEventListener(ev, () => (pendingDoor = null), { passive: true })); // the visitor took over
+  navButtons.forEach((btn) => {
     btn.addEventListener("click", () => {
+      const door = doors.find((d) => d.target === btn.dataset.target); // ABOUT has no room: it just walks there
+      if (door && door === st.door && st.open) return; // already inside
       leaveDoor();
-      const z = SECTIONS[btn.dataset.target];
+      pendingDoor = door || null;
+      const z = door ? door.z - 3 : SECTIONS[btn.dataset.target]; // camera z = z + 6: stop 3 units short of the door
       const lap = scrollableHeight() / 3;
       const top = lap + (z / LOOP_OFFSET) * lap;
       window.scrollTo({ top, behavior: reduceMotion ? "auto" : "smooth" });
@@ -1479,8 +1655,23 @@ function initExperience() {
   const pointerNDC = new THREE.Vector2();
   let hovered = null;
 
+  function kiteAt(clientX, clientY) { // pointer over the kite? the plane is the whole 1080x720 layer, so test its box in image pixels
+    pointerNDC.set((clientX / window.innerWidth) * 2 - 1, -(clientY / window.innerHeight) * 2 + 1);
+    raycaster.setFromCamera(pointerNDC, contactCam);
+    const uv = raycaster.intersectObject(kite)[0]?.uv;
+    if (!uv) return false;
+    const x = uv.x * 1080, y = (1 - uv.y) * 720;
+    return x > 561 && x < 684 && y > 145 && y < 281; // the kite art (575,159)-(670,267) + 14px so it is easy to hit
+  }
+
   function checkHover(clientX, clientY) {
     if (skyMode) return;
+    if (contactMode) {
+      kiteHover = kiteAt(clientX, clientY);
+      cursorEl.classList.toggle("is-hover", kiteHover && isFinePointer);
+      canvas.style.cursor = kiteHover ? "pointer" : "default";
+      return;
+    }
     pointerNDC.x = (clientX / window.innerWidth) * 2 - 1;
     pointerNDC.y = -(clientY / window.innerHeight) * 2 + 1;
     raycaster.setFromCamera(pointerNDC, camera);
@@ -1522,7 +1713,11 @@ function initExperience() {
     gsap.to(mesh.rotation, { z: mesh.userData.baseRotZ, duration: 0.3 });
   }
 
-  canvas.addEventListener("click", () => {
+  canvas.addEventListener("click", (e) => {
+    if (contactMode) {
+      if (moved <= 6 && kiteAt(e.clientX, e.clientY)) openModal("instagram");
+      return;
+    }
     if (!hovered || moved > 6 || skyMode) return; // a drag-to-look isn't a click
     const { type, data } = hovered.userData;
     if (type === "about" || type === "home") {
@@ -1593,6 +1788,7 @@ function initExperience() {
     camera.updateProjectionMatrix();
     skyCam.aspect = camera.aspect;
     skyCam.updateProjectionMatrix();
+    fitContact();
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, window.innerWidth < 760 ? 1.5 : 2));
   });
@@ -1640,9 +1836,20 @@ function initExperience() {
       return;
     }
 
+    if (contactMode) {
+      updateContact(t);
+      renderer.render(contactScene, contactCam);
+      requestAnimationFrame(tick);
+      return;
+    }
+
     /* camera damped follow of scroll target */
     const smoothing = reduceMotion ? 1 : 1 - Math.pow(0.0001, dt);
     currentZ += (targetZ - currentZ) * smoothing;
+    if (pendingDoor && !st.focus && Math.abs(currentZ - (pendingDoor.z - 3)) < 0.8) { // walked up to the door a menu click asked for
+      openDoor(pendingDoor);
+      pendingDoor = null;
+    }
     camera.position.z = 6 + currentZ; // small forward offset so entrance isn't flush with the sign
 
     /* follow the winding path, look a little ahead along it, slight roll for the tilted perspective */

@@ -1,4 +1,16 @@
 @font-face {
+  font-family: "Coustard";
+  src: url("./assets/fonts/Coustard-Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Coustard";
+  src: url("./assets/fonts/Coustard-Black.ttf") format("truetype");
+  font-weight: 900;
+  font-display: swap;
+}
+@font-face {
   font-family: "Fredericka the Great";
   src: url("./assets/fonts/FrederickatheGreat-Regular.ttf") format("truetype");
   font-display: swap;
@@ -17,8 +29,8 @@
   --red: #e95c4f;
   --blue: #4d7cfe;
 
-  --font-display: "Archivo Black", "Arial Black", sans-serif;
-  --font-body: "Space Grotesk", sans-serif;
+  --font-display: "Coustard", serif;
+  --font-body: "Coustard", serif;
   --font-hand: "Caveat", cursive;
 
   --nav-w: 220px;
@@ -667,7 +679,7 @@ body.no-webgl .sr-only-list .skill-group {
 .modal-tag {
   font-family: var(--font-body);
   font-size: 0.8rem;
-  font-weight: 500;
+  font-weight: 400;
   padding: 0.3rem 0.65rem;
   background: var(--paper);
   border: 1.5px solid var(--ink);
@@ -703,7 +715,7 @@ body.no-webgl .sr-only-list .skill-group {
 .btn-modal-secondary {
   font-family: var(--font-body);
   font-size: 0.85rem;
-  font-weight: 600;
+  font-weight: 900;
   padding: 0.6rem 1.1rem;
   background: transparent;
   color: var(--muted);
@@ -815,5 +827,6 @@ body.no-webgl .sr-only-list .skill-group {
 #skyFade { position: fixed; inset: 0; z-index: 50; background: #fafafa; opacity: 0; pointer-events: none; transition: opacity .45s ease; }
 body.sky-mode #skyBack { display: grid; }
 body.sky-mode #skyHint { display: block; }
+body.contact-room #skyHint { width: fit-content; margin: 0 auto; padding: .1rem .9rem; background: var(--paper-light); border: 2px solid var(--ink); box-shadow: 3px 3px 0 rgba(17,17,17,.15); } /* the kite room's ground is dark: give the hint paper to sit on */
 body.sky-mode #menuToggle, body.sky-mode #navigation { display: none; }
 body.sky-fade #skyFade { opacity: 1; }
